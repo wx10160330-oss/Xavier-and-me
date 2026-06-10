@@ -1,4 +1,4 @@
-name: "astrbot_plugin_xavier_mood_core"
+name: "xavier_and_me"
 display_name: "小回和我"
 desc: "沈星回情绪系统核心：评分LLM、幂律衰减、PA/NA软互抑、心情可视化前端"
 version: "0.2.0"
@@ -10,7 +10,7 @@ priority: 5
 config_schema:
   - item: target_user_id
     type: string
-    default: "2783984389"
+    default: "123456"
     desc: "只对这个QQ号启用情绪系统"
   - item: inject_mood_to_message
     type: bool
