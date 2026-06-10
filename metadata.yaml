@@ -46,7 +46,7 @@ config_schema:
     desc: "启用情绪可视化前端"
   - item: visualizer_host
     type: string
-    default: "127.0.0.1"
+    default: "0.0.0.0"
     desc: "前端服务监听地址"
   - item: visualizer_port
     type: int
