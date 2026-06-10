@@ -1,0 +1,92 @@
+{
+    "target_user_id": {
+        "description": "目标用户QQ",
+        "type": "string",
+        "default": "",
+        "hint": "只对这个QQ号启用情绪系统"
+    },
+    "inject_mood_to_message": {
+        "description": "注入隐藏心情上下文",
+        "type": "bool",
+        "default": true,
+        "hint": "开启后每次回复前注入心情快照"
+    },
+    "record_user_message": {
+        "description": "记录用户情绪事件",
+        "type": "bool",
+        "default": true,
+        "hint": "扫描消息并写入情绪事件池"
+    },
+    "score_llm_enabled": {
+        "description": "启用评分LLM",
+        "type": "bool",
+        "default": false,
+        "hint": "开启后优先调用独立评分LLM，失败则回退本地词典"
+    },
+    "score_api_url": {
+        "description": "评分LLM接口地址",
+        "type": "string",
+        "default": "",
+        "hint": "OpenAI兼容接口，例如 http://127.0.0.1:8000/v1/chat/completions"
+    },
+    "score_api_key": {
+        "description": "评分LLM API KEY",
+        "type": "string",
+        "default": "",
+        "hint": "没有鉴权可留空"
+    },
+    "score_model_name": {
+        "description": "评分LLM模型名",
+        "type": "string",
+        "default": "gpt-4o-mini",
+        "hint": "用于情绪评分的小模型名称"
+    },
+    "score_timeout": {
+        "description": "评分请求超时秒数",
+        "type": "int",
+        "default": 20,
+        "hint": "建议 10-30 秒"
+    },
+    "visualizer_enabled": {
+        "description": "启用可视化前端",
+        "type": "bool",
+        "default": true,
+        "hint": "开启后启动本地星图页面"
+    },
+    "visualizer_host": {
+        "description": "前端监听地址",
+        "type": "string",
+        "default": "127.0.0.1",
+        "hint": "本机查看用 127.0.0.1"
+    },
+    "visualizer_port": {
+        "description": "前端端口",
+        "type": "int",
+        "default": 5002,
+        "hint": "默认 http://127.0.0.1:5002"
+    },
+    "tau_hours": {
+        "description": "幂律衰减时间尺度",
+        "type": "float",
+        "default": 4.0,
+        "hint": "越大情绪淡得越慢"
+    },
+    "b_base": {
+        "description": "基础衰减指数",
+        "type": "float",
+        "default": 0.7,
+        "hint": "越大衰减越快"
+    },
+    "fab_positive_factor": {
+        "description": "正向情绪保留系数",
+        "type": "float",
+        "default": 0.85,
+        "hint": "越小正向情绪保留越久"
+    },
+    "esm_k": {
+        "description": "PA/NA软互抑强度",
+        "type": "float",
+        "default": 0.3,
+        "hint": "越大复合情绪越被压平"
+    }
+}

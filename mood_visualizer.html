@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小回和我</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 100%);
+            color: #5c3a41;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* 装饰背景 */
+        .bg-decor {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .bg-decor.bunny { top: 10%; left: 5%; font-size: 3rem; }
+        .bg-decor.fox { bottom: 10%; right: 5%; font-size: 3rem; }
+        .bg-decor.flower1 { top: 20%; right: 15%; font-size: 2rem; }
+        .bg-decor.flower2 { bottom: 30%; left: 10%; font-size: 2.5rem; }
+
+        /* Nav */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(255, 192, 203, 0.3);
+            box-shadow: 0 2px 10px rgba(255, 182, 193, 0.1);
+        }
+        .nav-tabs { display: flex; gap: 8px; }
+        .nav-tab {
+            padding: 10px 20px; font-size: 13px; font-weight: 600;
+            color: #d896a3; cursor: pointer;
+            border-radius: 16px; transition: all 0.3s;
+            background: transparent;
+            border: 1.5px solid transparent;
+        }
+        .nav-tab:hover { 
+            color: #ff8da1; 
+            background: rgba(255, 240, 245, 0.6);
+            border-color: rgba(255, 182, 193, 0.3);
+        }
+        .nav-tab.active {
+            color: #fff; 
+            background: linear-gradient(135deg, #ffb6c1 0%, #ff8da1 100%);
+            box-shadow: 0 4px 12px rgba(255, 182, 193, 0.4);
+            border-color: transparent;
+        }
+
+        /* Pages */
+        .page { display: none; padding-top: 80px; min-height: 100vh; padding-bottom: 60px; }
+        .page.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+        .container { max-width: 600px; margin: 0 auto; padding: 0 20px; }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(255, 182, 193, 0.2);
+            border: 2px solid #fff;
+            backdrop-filter: blur(8px);
+        }
+        .card-title {
+            font-size: 14px; font-weight: 700; color: #ff8da1;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
+        }
+
+        /* Energy */
+        .energy-wrap { display: flex; flex-direction: column; align-items: center; }
+        .energy-ring { position: relative; width: 150px; height: 150px; margin: 10px 0; }
+        .energy-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .ring-bg { fill: none; stroke: rgba(255, 192, 203, 0.3); stroke-width: 12; }
+        .ring-fill { fill: none; stroke: #ffb6c1; stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+        .energy-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .energy-num { font-size: 36px; font-weight: 700; color: #ff8da1; line-height: 1; }
+        .energy-label { font-size: 12px; color: #d896a3; margin-top: 4px; }
+        
+        .status-text { text-align: center; color: #5c3a41; font-size: 15px; margin-top: 10px; }
+        .mood-tag { display: inline-block; padding: 4px 12px; background: #ffe4e1; color: #ff8da1; border-radius: 12px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+
+        /* Timeline */
+        .timeline { position: relative; padding-left: 20px; margin-top: 20px; }
+        .timeline::before { content: ''; position: absolute; left: 6px; top: 10px; bottom: 10px; width: 2px; background: #ffe4e1; }
+        .tl-item { position: relative; padding-bottom: 20px; padding-left: 20px; padding-right: 50px; }
+        .tl-dot { position: absolute; left: -20px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid #ffb6c1; z-index: 1; }
+        .tl-item.current .tl-dot { background: #ffb6c1; box-shadow: 0 0 10px #ffb6c1; animation: pulse 2s infinite; }
+        .tl-item.past .tl-dot { border-color: #ffe4e1; }
+        .tl-time { font-size: 12px; font-weight: 700; color: #d896a3; margin-bottom: 4px; }
+        .tl-content { background: rgba(255, 255, 255, 0.5); padding: 12px 16px; border-radius: 16px; font-size: 14px; }
+        .tl-item.current .tl-content { background: #fff; border: 1px solid #ffe4e1; }
+        .tl-item.future .tl-content { filter: blur(4px); transition: filter 0.3s; }
+        .tl-item.future.peeking .tl-content { filter: blur(0); }
+        
+        .peek-btn {
+            position: absolute; right: 0; top: 4px;
+            padding: 6px 12px; border-radius: 16px;
+            background: rgba(255, 192, 203, 0.2); border: 1px solid #ffb6c1;
+            color: #ff8da1; font-size: 12px; cursor: pointer;
+            opacity: 0; transition: all 0.3s;
+        }
+        .tl-item.future:hover .peek-btn { opacity: 1; }
+        .peek-btn:hover { background: rgba(255, 192, 203, 0.35); }
+        
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,182,193,0.7); } 70% { box-shadow: 0 0 0 10px rgba(255,182,193,0); } 100% { box-shadow: 0 0 0 0 rgba(255,182,193,0); } }
+
+        /* Debug */
+        .debug-btn { text-align: center; font-size: 12px; color: #d896a3; cursor: pointer; margin-top: 20px; }
+        .debug-panel { display: none; background: rgba(255,255,255,0.5); padding: 15px; border-radius: 12px; font-size: 11px; margin-top: 10px; white-space: pre-wrap; }
+
+        /* Calendar */
+        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
+        .cal-header { text-align: center; font-size: 12px; font-weight: 700; color: #ff8da1; padding: 8px 0; }
+        .cal-day {
+            aspect-ratio: 1;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: #5c3a41;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            position: relative;
+            cursor: default;
+        }
+        .cal-day.today { 
+            font-weight: 700; 
+            color: #fff;
+            background: linear-gradient(135deg, #ffb6c1 0%, #ff8da1 100%);
+            box-shadow: 0 2px 8px rgba(255, 182, 193, 0.5);
+        }
+        .cal-day.period { background: rgba(255, 182, 193, 0.6); color: #fff; font-weight: 600; }
+        .cal-day.predicted { background: rgba(255, 240, 245, 0.8); border: 2px dashed #ffb6c1; }
+        .cal-day.other-month { opacity: 0.3; }
+        .cal-day .dot { position: absolute; bottom: 2px; width: 4px; height: 4px; border-radius: 50%; background: #ff8da1; }
+        
+        .cal-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .cal-nav button { padding: 6px 12px; background: rgba(255, 192, 203, 0.2); border: 1px solid #ffb6c1; color: #ff8da1; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 12px; }
+        .cal-nav button:hover { background: rgba(255, 192, 203, 0.35); }
+        .cal-nav .month-year { font-size: 14px; font-weight: 700; color: #ff8da1; }
+        
+    </style>
+
+    <meta name="apple-mobile-web-app-title" content="小回和我">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZmZiNmMxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNkOGI0ZTIiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgcng9IjQwIiBmaWxsPSJ1cmwoI2JnKSIvPgogIDx0ZXh0IHg9IjIwIiB5PSI1MCIgZm9udC1zaXplPSIyNCIgZmlsbD0id2hpdGUiPuKcqDwvdGV4dD4KICA8dGV4dCB4PSIxNTAiIHk9IjgwIiBmb250LXNpemU9IjIwIiBmaWxsPSJ3aGl0ZSI+4q2QPC90ZXh0PgogIDx0ZXh0IHg9IjQwIiB5PSIxNjAiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IndoaXRlIj7irZA8L3RleHQ+CiAgPGVsbGlwc2UgY3g9Ijc1IiBjeT0iNzAiIHJ4PSIxOCIgcnk9IjQ1IiBmaWxsPSJ3aGl0ZSIgdHJhbnNmb3JtPSJyb3RhdGUoLTE1IDc1IDcwKSIvPgogIDxlbGxpcHNlIGN4PSIxMjUiIGN5PSI3MCIgcng9IjE4IiByeT0iNDUiIGZpbGw9IndoaXRlIiB0cmFuc2Zvcm09InJvdGF0ZSgxNSAxMjUgNzApIi8+CiAgPGVsbGlwc2UgY3g9Ijc1IiBjeT0iNzUiIHJ4PSI4IiByeT0iMzAiIGZpbGw9IiNmZmIzYzYiIHRyYW5zZm9ybT0icm90YXRlKC0xNSA3NSA3NSkiLz4KICA8ZWxsaXBzZSBjeD0iMTI1IiBjeT0iNzUiIHJ4PSI4IiByeT0iMzAiIGZpbGw9IiNmZmIzYzYiIHRyYW5zZm9ybT0icm90YXRlKDE1IDEyNSA3NSkiLz4KICA8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMjAiIHI9IjUwIiBmaWxsPSJ3aGl0ZSIvPgogIDxjaXJjbGUgY3g9IjgwIiBjeT0iMTE1IiByPSI2IiBmaWxsPSIjNGE0YTRhIi8+CiAgPGNpcmNsZSBjeD0iMTIwIiBjeT0iMTE1IiByPSI2IiBmaWxsPSIjNGE0YTRhIi8+CiAgPGVsbGlwc2UgY3g9IjY1IiBjeT0iMTI1IiByeD0iMTAiIHJ5PSI1IiBmaWxsPSIjZmZiM2M2IiBvcGFjaXR5PSIwLjciLz4KICA8ZWxsaXBzZSBjeD0iMTM1IiBjeT0iMTI1IiByeD0iMTAiIHJ5PSI1IiBmaWxsPSIjZmZiM2M2IiBvcGFjaXR5PSIwLjciLz4KICA8cGF0aCBkPSJNIDk1IDEyNSBRIDEwMCAxMzIgMTA1IDEyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNGE0YTRhIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPg==">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZmZiNmMxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNkOGI0ZTIiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgcng9IjQwIiBmaWxsPSJ1cmwoI2JnKSIvPgogIDx0ZXh0IHg9IjIwIiB5PSI1MCIgZm9udC1zaXplPSIyNCIgZmlsbD0id2hpdGUiPuKcqDwvdGV4dD4KICA8dGV4dCB4PSIxNTAiIHk9IjgwIiBmb250LXNpemU9IjIwIiBmaWxsPSJ3aGl0ZSI+4q2QPC90ZXh0PgogIDx0ZXh0IHg9IjQwIiB5PSIxNjAiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IndoaXRlIj7irZA8L3RleHQ+CiAgPGVsbGlwc2UgY3g9Ijc1IiBjeT0iNzAiIHJ4PSIxOCIgcnk9IjQ1IiBmaWxsPSJ3aGl0ZSIgdHJhbnNmb3JtPSJyb3RhdGUoLTE1IDc1IDcwKSIvPgogIDxlbGxpcHNlIGN4PSIxMjUiIGN5PSI3MCIgcng9IjE4IiByeT0iNDUiIGZpbGw9IndoaXRlIiB0cmFuc2Zvcm09InJvdGF0ZSgxNSAxMjUgNzApIi8+CiAgPGVsbGlwc2UgY3g9Ijc1IiBjeT0iNzUiIHJ4PSI4IiByeT0iMzAiIGZpbGw9IiNmZmIzYzYiIHRyYW5zZm9ybT0icm90YXRlKC0xNSA3NSA3NSkiLz4KICA8ZWxsaXBzZSBjeD0iMTI1IiBjeT0iNzUiIHJ4PSI4IiByeT0iMzAiIGZpbGw9IiNmZmIzYzYiIHRyYW5zZm9ybT0icm90YXRlKDE1IDEyNSA3NSkiLz4KICA8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMjAiIHI9IjUwIiBmaWxsPSJ3aGl0ZSIvPgogIDxjaXJjbGUgY3g9IjgwIiBjeT0iMTE1IiByPSI2IiBmaWxsPSIjNGE0YTRhIi8+CiAgPGNpcmNsZSBjeD0iMTIwIiBjeT0iMTE1IiByPSI2IiBmaWxsPSIjNGE0YTRhIi8+CiAgPGVsbGlwc2UgY3g9IjY1IiBjeT0iMTI1IiByeD0iMTAiIHJ5PSI1IiBmaWxsPSIjZmZiM2M2IiBvcGFjaXR5PSIwLjciLz4KICA8ZWxsaXBzZSBjeD0iMTM1IiBjeT0iMTI1IiByeD0iMTAiIHJ5PSI1IiBmaWxsPSIjZmZiM2M2IiBvcGFjaXR5PSIwLjciLz4KICA8cGF0aCBkPSJNIDk1IDEyNSBRIDEwMCAxMzIgMTA1IDEyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNGE0YTRhIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPg==">
+</head>
+<body>
+
+    <div class="bg-decor bunny">🐰</div>
+    <div class="bg-decor fox">🦊</div>
+    <div class="bg-decor flower1">🌸</div>
+    <div class="bg-decor flower2">🌷</div>
+
+    <nav class="nav">
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-page="status" onclick="go('status')">状态 🌸</div>
+            <div class="nav-tab" data-page="day" onclick="go('day')">日程 ⭐</div>
+            <div class="nav-tab" data-page="coco" onclick="go('coco')">关于可可 💗</div>
+        </div>
+    </nav>
+
+    <!-- STATUS PAGE -->
+    <div id="page-status" class="page active">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #ff8da1; font-weight: 700; letter-spacing: 2px;">XAVIER STATUS</h2>
+                <div id="status-weather-outfit" style="font-size: 12px; color: #d896a3; margin-top: 5px;">--</div>
+            </div>
+
+            <div class="card">
+                <div class="energy-wrap">
+                    <div id="energy-time" style="font-size: 16px; font-weight: 600; color: #d896a3;">--:--</div>
+                    <div class="energy-ring">
+                        <svg viewBox="0 0 150 150">
+                            <circle class="ring-bg" cx="75" cy="75" r="65"/>
+                            <circle class="ring-fill" id="energy-ring" cx="75" cy="75" r="65" stroke-dasharray="408.4" stroke-dashoffset="408.4"/>
+                        </svg>
+                        <div class="energy-center">
+                            <div class="energy-num" id="energy-num">--</div>
+                            <div class="energy-label">ENERGY</div>
+                        </div>
+                    </div>
+                    <div id="energy-perception" style="font-size: 13px; color: #5c3a41; margin-top: 10px;">--</div>
+                    <div class="mood-tag" id="energy-label">--</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🐰 当前状态</div>
+                <div id="sc-status" style="font-size: 15px; line-height: 1.5; margin-bottom: 8px;">加载中...</div>
+                <div id="sc-detail" style="font-size: 13px; color: #d896a3;"></div>
+                <div id="sc-next" style="font-size: 12px; color: #ffb6c1; margin-top: 10px;"></div>
+            </div>
+
+
+
+            <div class="card">
+                <div class="card-title" style="cursor: pointer;" onclick="toggleContext()">
+                    <span>⚡ 注入上下文</span>
+                    <span id="context-toggle" style="font-size: 12px; margin-left: 8px; color: #d896a3;">▸ 展开</span>
+                </div>
+                <div id="period-status-hint" style="display: none; font-size: 11px; color: #ff8da1; margin-top: 8px; padding: 8px; background: rgba(255, 240, 245, 0.6); border-radius: 8px; border-left: 3px solid #ffb6c1;">
+                    <strong>【当前经期状态】</strong><br>
+                    <span id="period-hint-text">--</span>
+                </div>
+                <div id="composer-preview" style="display: none; font-size: 12px; line-height: 1.6; color: #5c3a41; white-space: pre-wrap; max-height: 400px; overflow-y: auto; margin-top: 10px; padding: 12px; background: rgba(255, 240, 245, 0.5); border-radius: 12px;">--</div>
+            </div>
+
+            <div class="debug-btn" onclick="toggleDebug()">▸ 开发者信息</div>
+            <div class="debug-panel" id="debug-panel">--</div>
+        </div>
+    </div>
+
+    <!-- DAY PAGE -->
+    <div id="page-day" class="page">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #ff8da1; font-weight: 700; letter-spacing: 2px;">XAVIER'S DAY</h2>
+                <div id="day-date" style="font-size: 12px; color: #d896a3; margin-top: 5px;">--</div>
+                <div class="mood-tag" id="day-type" style="margin-top: 10px;">--</div>
+            </div>
+
+            <div class="card" style="text-align: center; background: #fff0f5; border-color: #ffe4e1;">
+                <div style="font-size: 12px; color: #ff8da1; font-weight: 700; margin-bottom: 5px;">NOW 🐾</div>
+                <div id="now-time" style="font-size: 24px; font-weight: 700; color: #ffb6c1;">--:--</div>
+                <div id="now-text" style="font-size: 15px; margin: 10px 0;">加载中...</div>
+                <div class="mood-tag" id="now-mood">--</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🌸 今日时间线</div>
+                <div class="timeline" id="timeline"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COCO PAGE -->
+    <div id="page-coco" class="page">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #ff8da1; font-weight: 700; letter-spacing: 2px;">ABOUT COCO 💗</h2>
+                <div style="font-size: 12px; color: #d896a3; margin-top: 5px;">可可的专属设定与状态</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📅 经期日历</div>
+                <div class="cal-nav">
+                    <button onclick="changeMonth(-1)">« 上月</button>
+                    <div class="month-year" id="cal-month-year">2026年6月</div>
+                    <button onclick="changeMonth(1)">下月 »</button>
+                </div>
+                <div class="calendar" id="calendar-grid">
+                    <div class="cal-header">日</div>
+                    <div class="cal-header">一</div>
+                    <div class="cal-header">二</div>
+                    <div class="cal-header">三</div>
+                    <div class="cal-header">四</div>
+                    <div class="cal-header">五</div>
+                    <div class="cal-header">六</div>
+                </div>
+                <div style="display: flex; gap: 15px; justify-content: center; font-size: 11px; color: #d896a3; margin-top: 15px;">
+                    <div><span style="display:inline-block; width:12px; height:12px; background:rgba(255,182,193,0.6); border-radius:3px; margin-right:4px; vertical-align:middle;"></span>经期中</div>
+                    <div><span style="display:inline-block; width:12px; height:12px; background:rgba(255,240,245,0.8); border:2px dashed #ffb6c1; border-radius:3px; margin-right:4px; vertical-align:middle;"></span>预测时间</div>
+                    <div><span style="display:inline-block; width:12px; height:12px; background:linear-gradient(135deg,#ffb6c1,#ff8da1); border-radius:3px; margin-right:4px; vertical-align:middle;"></span>今天</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🩸 经期状态</div>
+                <div id="period-status-text" style="font-size: 15px; font-weight: 600; color: #ff8da1; text-align: center; margin: 10px 0;">加载中...</div>
+                <div id="period-next-text" style="font-size: 12px; color: #d896a3; text-align: center; margin-bottom: 15px;"></div>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; justify-content: center;" id="period-action-buttons">
+                    <!-- 按钮会动态渲染 -->
+                </div>
+                
+                <div style="font-size: 12px; font-weight: 600; color: #ff8da1; margin-bottom: 10px;">历史记录</div>
+                <div id="period-records-list" style="font-size: 13px; color: #5c3a41; max-height: 150px; overflow-y: auto;">
+                    <!-- 记录列表 -->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">💬 注入提示词设置</div>
+                <div style="font-size: 12px; color: #d896a3; margin-bottom: 10px;">这些提示词会在你处于对应状态时，悄悄告诉他。可以使用 {day} 或 {days} 作为天数占位符。</div>
+                
+                <div style="margin-bottom: 15px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #ff8da1; margin-bottom: 5px;">经期中 (during)</div>
+                    <textarea id="tpl-during" style="width: 100%; height: 60px; padding: 10px; border: 1px solid #ffe4e1; border-radius: 12px; font-family: inherit; color: #5c3a41; resize: none;"></textarea>
+                    <button onclick="saveTemplate('during')" style="margin-top: 5px; padding: 4px 12px; background: #ffe4e1; color: #ff8da1; border: none; border-radius: 8px; cursor: pointer; font-size: 12px;">保存</button>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #ff8da1; margin-bottom: 5px;">快来时 (before)</div>
+                    <textarea id="tpl-before" style="width: 100%; height: 60px; padding: 10px; border: 1px solid #ffe4e1; border-radius: 12px; font-family: inherit; color: #5c3a41; resize: none;"></textarea>
+                    <button onclick="saveTemplate('before')" style="margin-top: 5px; padding: 4px 12px; background: #ffe4e1; color: #ff8da1; border: none; border-radius: 8px; cursor: pointer; font-size: 12px;">保存</button>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <div style="font-size: 13px; font-weight: 600; color: #ff8da1; margin-bottom: 5px;">推迟了 (delayed)</div>
+                    <textarea id="tpl-delayed" style="width: 100%; height: 60px; padding: 10px; border: 1px solid #ffe4e1; border-radius: 12px; font-family: inherit; color: #5c3a41; resize: none;"></textarea>
+                    <button onclick="saveTemplate('delayed')" style="margin-top: 5px; padding: 4px 12px; background: #ffe4e1; color: #ff8da1; border: none; border-radius: 8px; cursor: pointer; font-size: 12px;">保存</button>
+                </div>
+
+                <div>
+                    <div style="font-size: 13px; font-weight: 600; color: #ff8da1; margin-bottom: 5px;">平时 (after)</div>
+                    <textarea id="tpl-after" style="width: 100%; height: 60px; padding: 10px; border: 1px solid #ffe4e1; border-radius: 12px; font-family: inherit; color: #5c3a41; resize: none;"></textarea>
+                    <button onclick="saveTemplate('after')" style="margin-top: 5px; padding: 4px 12px; background: #ffe4e1; color: #ff8da1; border: none; border-radius: 8px; cursor: pointer; font-size: 12px;">保存</button>
+
+            
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const $ = id => document.getElementById(id);
+        const esc = s => { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
+
+        function go(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            $('page-' + page).classList.add('active');
+            document.querySelector(`.nav-tab[data-page="${page}"]`).classList.add('active');
+            if (page === 'status') loadStatus();
+            if (page === 'day') loadDay();
+            if (page === 'coco') { loadCoco(); }
+        }
+
+        function toggleDebug() {
+            const p = $('debug-panel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleContext() {
+            const p = $('composer-preview');
+            const h = $('period-status-hint');
+            const t = $('context-toggle');
+            if (p.style.display === 'block') {
+                p.style.display = 'none';
+                h.style.display = 'none';
+                t.textContent = '▸ 展开';
+            } else {
+                p.style.display = 'block';
+                h.style.display = 'block';
+                t.textContent = '▾ 收起';
+            }
+        }
+
+        function peek(btn) {
+            const item = btn.closest('.tl-item');
+            if (item.classList.contains('peeking')) return;
+            item.classList.add('peeking');
+            btn.style.opacity = '0.3';
+            setTimeout(() => {
+                item.classList.remove('peeking');
+                btn.style.opacity = '';
+            }, 3000);
+        }
+
+        async function loadStatus() {
+            try {
+                const r = await fetch('/api/core');
+                const d = await r.json();
+                if (!d.ok) return;
+                
+                const life = d.life || {};
+                const physio = life.physio || {};
+                const memory = d.memory || {};
+                const debug = d.debug || {};
+
+                // Energy
+                const energy = physio.energy_level ?? 50;
+                const circ = 408.4;
+                $('energy-ring').style.strokeDashoffset = circ * (1 - energy / 100);
+                $('energy-num').textContent = Math.round(energy);
+
+                const h = physio.hour ?? '--';
+                const m = physio.minute ?? '--';
+                $('energy-time').textContent = (h !== '--' && m !== '--') ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}` : '--:--';
+                $('energy-perception').textContent = physio.time_perception || '--';
+                $('energy-label').textContent = physio.energy_label || '--';
+
+                // Schedule
+                $('sc-status').textContent = life.current || '低功耗待机中';
+                let detailText = [];
+                if (life.location) detailText.push(`📍 ${life.location}`);
+                if (life.detail) detailText.push(`✨ ${life.detail}`);
+                $('sc-detail').textContent = detailText.join(' | ');
+                $('sc-next').textContent = life.next ? `→ ${life.next}` : '';
+                
+                let weatherOutfitText = '';
+                if (life.weather) weatherOutfitText += `天气：${life.weather} `;
+                if (life.outfit) weatherOutfitText += `| 穿搭：${life.outfit}`;
+                $('status-weather-outfit').textContent = weatherOutfitText || '在猎人公寓';
+
+                // Composer
+                const composer = d.composer || {};
+                $('composer-preview').textContent = composer.final_context || '--';
+
+                // Period hint
+                const periodHint = composer.period_hint || '';
+                if (periodHint) {
+                    $('period-hint-text').textContent = periodHint;
+                    $('period-status-hint').style.display = 'block';
+                } else {
+                    $('period-status-hint').style.display = 'none';
+                }
+
+                // Debug
+                $('debug-panel').textContent = `Stage: ${debug.stage || '--'}\nUpdated: ${d.updated_at_text || '--'}`;
+
+            } catch (e) { console.error('Status load error:', e); }
+        }
+
+        async function loadDay() {
+            try {
+                const r = await fetch('/api/schedule');
+                const d = await r.json();
+                
+                $('day-date').textContent = d.date || '--';
+                $('day-type').textContent = d.day_type || '日常';
+
+                const tl = d.timeline || [];
+                const ci = d.current_index ?? -1;
+                const cur = ci >= 0 && ci < tl.length ? tl[ci] : null;
+
+                $('now-time').textContent = cur ? cur.time : '--:--';
+                $('now-text').textContent = cur ? cur.status : '暂无日程';
+                $('now-mood').textContent = cur ? cur.mood : '待机';
+
+                $('timeline').innerHTML = tl.map((n, idx) => {
+                    const isCur = n.is_current ? 'current' : n.is_past ? 'past' : 'future';
+                    let detailHtml = '';
+                    if (n.location || n.detail) {
+                        let detailText = [];
+                        if (n.location) detailText.push(`📍 ${esc(n.location)}`);
+                        if (n.detail) detailText.push(`✨ ${esc(n.detail)}`);
+                        detailHtml = `<div style="font-size: 12px; color: #d896a3; margin-top: 4px;">${detailText.join(' | ')}</div>`;
+                    }
+                    const peekBtn = !n.is_current && !n.is_past ? `<div class="peek-btn" onclick="peek(this)">🐾 偷看</div>` : '';
+                    return `<div class="tl-item ${isCur}">
+                        <div class="tl-dot"></div>
+                        <div class="tl-time">${esc(n.time)}</div>
+                        <div class="tl-content">
+                            <span style="font-weight:600;">${esc(n.status)}</span>
+                            <span style="font-size:12px; color:#ff8da1; margin-left:8px;">${esc(n.mood)}</span>
+                            ${detailHtml}
+                        </div>
+                        ${peekBtn}
+                    </div>`;
+                }).join('');
+
+            } catch (e) { console.error('Day load error:', e); }
+        }
+
+        async function loadCoco() {
+            try {
+                const r = await fetch('/api/period');
+                const d = await r.json();
+                if (!d.ok) return;
+
+                // 保存全局数据供日历使用
+                window.periodData = d;
+
+                // 状态显示
+                const status = d.current_status || {};
+                const current = d.current || null;
+                let statusText = "未知状态";
+                if (status.status === 'during') {
+                    statusText = `🩸 经期中 (第 ${status.day} 天)`;
+                } else if (status.status === 'before') {
+                    statusText = `⚠️ 快来了 (还有 ${status.days_until} 天)`;
+                } else if (status.status === 'delayed') {
+                    statusText = `⏰ 推迟了 (已延迟 ${status.days_delayed} 天)`;
+                } else if (status.status === 'safe') {
+                    statusText = `🌸 安全期`;
+                }
+                $('period-status-text').textContent = statusText;
+                $('period-next-text').textContent = status.next_predicted ? `预测日期: ${status.next_predicted}` : '';
+
+                // 操作按钮
+                if (current && current.ongoing) {
+                    $('period-action-buttons').innerHTML = `
+                        <button onclick="endPeriod()" style="padding: 10px 24px; background: #fff; color: #ff8da1; border: 2px solid #ff8da1; border-radius: 20px; cursor: pointer; font-weight: 700; font-size: 14px; box-shadow: 0 2px 8px rgba(255, 182, 193, 0.3);">
+                            ✅ 结束记录
+                        </button>
+                    `;
+                } else {
+                    $('period-action-buttons').innerHTML = `
+                        <button onclick="startPeriod()" style="padding: 10px 24px; background: #ffb6c1; color: #fff; border: none; border-radius: 20px; cursor: pointer; font-weight: 700; font-size: 14px; box-shadow: 0 2px 8px rgba(255, 182, 193, 0.4);">
+                            🩸 开始记录
+                        </button>
+                    `;
+                }
+
+                // 模板
+                const tpl = d.templates || {};
+                $('tpl-during').value = tpl.during || '';
+                $('tpl-before').value = tpl.before || '';
+                $('tpl-delayed').value = tpl.delayed || '';
+                $('tpl-after').value = tpl.after || '';
+
+                // 记录列表
+                const records = d.records || [];
+                $('period-records-list').innerHTML = records.map(r => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #ffe4e1;">
+                        <span>${r.start} (${r.days}天)</span>
+                        <button onclick="deletePeriodRecord('${r.start}')" style="padding: 2px 8px; background: transparent; color: #ff8da1; border: 1px solid #ff8da1; border-radius: 8px; cursor: pointer; font-size: 12px;">删除</button>
+                    </div>
+                `).join('');
+
+                // 渲染日历
+                renderCalendar();
+
+            } catch (e) { console.error('Coco load error:', e); }
+        }
+
+        let currentCalendarDate = new Date();
+
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            $('cal-month-year').textContent = `${year}年${month + 1}月`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+            // 获取经期数据
+            const data = window.periodData || {};
+            const records = data.records || [];
+            const cycle = data.cycle || 28;
+            const status = data.current_status || {};
+
+            // 构建经期日期集合
+            const periodDates = new Set();
+            const predictedDates = new Set();
+
+            records.forEach(r => {
+                const start = new Date(r.start);
+                for (let i = 0; i < r.days; i++) {
+                    const d = new Date(start);
+                    d.setDate(d.getDate() + i);
+                    periodDates.add(d.toISOString().split('T')[0]);
+                }
+            });
+
+            // 预测日期
+            if (status.next_predicted) {
+                const predictStart = new Date(status.next_predicted);
+                for (let i = 0; i < 5; i++) {
+                    const d = new Date(predictStart);
+                    d.setDate(d.getDate() + i);
+                    predictedDates.add(d.toISOString().split('T')[0]);
+                }
+            }
+
+            let html = '';
+            // 前置空格
+            for (let i = 0; i < firstDay; i++) {
+                const prevMonth = new Date(year, month, 0);
+                const day = prevMonth.getDate() - firstDay + i + 1;
+                html += `<div class="cal-day other-month">${day}</div>`;
+            }
+            // 本月日期
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                let classes = 'cal-day';
+                if (dateStr === todayStr) classes += ' today';
+                else if (periodDates.has(dateStr)) classes += ' period';
+                else if (predictedDates.has(dateStr)) classes += ' predicted';
+                
+                html += `<div class="${classes}">${day}</div>`;
+            }
+            // 后置空格
+            const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+            for (let i = firstDay + daysInMonth; i < totalCells; i++) {
+                const day = i - firstDay - daysInMonth + 1;
+                html += `<div class="cal-day other-month">${day}</div>`;
+            }
+
+            $('calendar-grid').innerHTML = `
+                <div class="cal-header">日</div>
+                <div class="cal-header">一</div>
+                <div class="cal-header">二</div>
+                <div class="cal-header">三</div>
+                <div class="cal-header">四</div>
+                <div class="cal-header">五</div>
+                <div class="cal-header">六</div>
+                ${html}
+            `;
+        }
+
+        function changeMonth(delta) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        async function addPeriodRecord() {
+            const start = $('period-start-input').value;
+            const days = $('period-days-input').value;
+            if (!start) return alert('请选择开始日期');
+            
+            try {
+                const r = await fetch('/api/period/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ start, days })
+                });
+                const d = await r.json();
+                if (d.ok) {
+                    $('period-start-input').value = '';
+                    loadCoco();
+                } else {
+                    alert('添加失败');
+                }
+            } catch (e) { alert('请求失败'); }
+        }
+
+        async function startPeriod() {
+            if (!confirm('确定今天开始记录经期吗？')) return;
+            try {
+                const r = await fetch('/api/period/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const d = await r.json();
+                if (d.ok) {
+                    loadCoco();
+                } else {
+                    alert('操作失败');
+                }
+            } catch (e) { alert('请求失败'); }
+        }
+
+        async function endPeriod() {
+            if (!confirm('确定今天结束经期吗？')) return;
+            try {
+                const r = await fetch('/api/period/end', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const d = await r.json();
+                if (d.ok) {
+                    loadCoco();
+                } else {
+                    alert('操作失败');
+                }
+            } catch (e) { alert('请求失败'); }
+        }
+
+        async function deletePeriodRecord(start) {
+            if (!confirm(`确定要删除 ${start} 的记录吗？`)) return;
+            try {
+                const r = await fetch('/api/period/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ start })
+                });
+                const d = await r.json();
+                if (d.ok) {
+                    loadCoco();
+                } else {
+                    alert('删除失败');
+                }
+            } catch (e) { alert('请求失败'); }
+        }
+
+        async function saveTemplate(type) {
+            const text = $(`tpl-${type}`).value;
+            try {
+                const r = await fetch('/api/period/template', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, text })
+                });
+                const d = await r.json();
+                if (d.ok) {
+                    alert('保存成功！');
+                } else {
+                    alert('保存失败');
+                }
+            } catch (e) { alert('请求失败'); }
+        }
+
+        loadStatus();
+        setInterval(() => {
+            if ($('page-status').classList.contains('active')) loadStatus();
+        }, 5000);
+
+        
+        
+        
+        function toggleDiary(btn) {
+            const item = btn.closest('div').parentElement;
+            const content = item.querySelector('.diary-content');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                btn.textContent = '收起';
+            } else {
+                content.style.display = 'none';
+                btn.textContent = '展开';
+            }
+        }
+        
+        
+    </script>
+</body>
+</html>
