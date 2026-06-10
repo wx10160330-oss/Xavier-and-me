@@ -1,5 +1,5 @@
 name: "astrbot_plugin_xavier_mood_core"
-display_name: "Xavier Mood Core"
+display_name: "小回和我"
 desc: "沈星回情绪系统核心：评分LLM、幂律衰减、PA/NA软互抑、心情可视化前端"
 version: "0.2.0"
 author: "wx10160330-oss"
