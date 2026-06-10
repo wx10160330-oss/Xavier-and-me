@@ -1,102 +1,70 @@
-{
-  "name": "astrbot_plugin_xavier_mood_core",
-  "display_name": "Xavier Mood Core",
-  "desc": "沈星回情绪系统核心：评分LLM、幂律衰减、PA/NA软互抑、心情可视化前端",
-  "help": "/xavier_mood 查看当前心情；/xavier_mood_debug 查看调试；前端默认 http://127.0.0.1:5002",
-  "version": "0.2.0",
-  "author": "Xavier & DD",
-  "repo": "",
-  "priority": 5,
-  "config_schema": [
-    {
-      "item": "target_user_id",
-      "type": "string",
-      "default": "2783984389",
-      "desc": "只对这个QQ号启用情绪系统"
-    },
-    {
-      "item": "inject_mood_to_message",
-      "type": "bool",
-      "default": true,
-      "desc": "回复前注入隐藏心情上下文"
-    },
-    {
-      "item": "record_user_message",
-      "type": "bool",
-      "default": true,
-      "desc": "扫描用户消息并写入情绪事件池"
-    },
-    {
-      "item": "score_llm_enabled",
-      "type": "bool",
-      "default": false,
-      "desc": "启用独立评分LLM"
-    },
-    {
-      "item": "score_api_url",
-      "type": "string",
-      "default": "",
-      "desc": "评分LLM接口地址，OpenAI兼容 /v1/chat/completions"
-    },
-    {
-      "item": "score_api_key",
-      "type": "string",
-      "default": "",
-      "desc": "评分LLM API KEY"
-    },
-    {
-      "item": "score_model_name",
-      "type": "string",
-      "default": "gpt-4o-mini",
-      "desc": "评分LLM模型名"
-    },
-    {
-      "item": "score_timeout",
-      "type": "int",
-      "default": 20,
-      "desc": "评分LLM请求超时秒数"
-    },
-    {
-      "item": "visualizer_enabled",
-      "type": "bool",
-      "default": true,
-      "desc": "启用情绪可视化前端"
-    },
-    {
-      "item": "visualizer_host",
-      "type": "string",
-      "default": "127.0.0.1",
-      "desc": "前端服务监听地址"
-    },
-    {
-      "item": "visualizer_port",
-      "type": "int",
-      "default": 5002,
-      "desc": "前端服务端口"
-    },
-    {
-      "item": "tau_hours",
-      "type": "float",
-      "default": 4.0,
-      "desc": "幂律衰减时间尺度"
-    },
-    {
-      "item": "b_base",
-      "type": "float",
-      "default": 0.7,
-      "desc": "基础衰减指数"
-    },
-    {
-      "item": "fab_positive_factor",
-      "type": "float",
-      "default": 0.85,
-      "desc": "正向情绪衰减减速因子"
-    },
-    {
-      "item": "esm_k",
-      "type": "float",
-      "default": 0.3,
-      "desc": "PA/NA软互抑强度"
-    }
-  ]
-}
+name: "astrbot_plugin_xavier_mood_core"
+display_name: "Xavier Mood Core"
+desc: "沈星回情绪系统核心：评分LLM、幂律衰减、PA/NA软互抑、心情可视化前端"
+version: "0.2.0"
+author: "wx10160330-oss"
+repo: "https://github.com/wx10160330-oss/Xavier-and-me"
+help: "/xavier_mood 查看当前心情；/xavier_mood_debug 查看调试；前端默认 http://127.0.0.1:5002"
+priority: 5
+
+config_schema:
+  - item: target_user_id
+    type: string
+    default: "2783984389"
+    desc: "只对这个QQ号启用情绪系统"
+  - item: inject_mood_to_message
+    type: bool
+    default: true
+    desc: "回复前注入隐藏心情上下文"
+  - item: record_user_message
+    type: bool
+    default: true
+    desc: "扫描用户消息并写入情绪事件池"
+  - item: score_llm_enabled
+    type: bool
+    default: false
+    desc: "启用独立评分LLM"
+  - item: score_api_url
+    type: string
+    default: ""
+    desc: "评分LLM接口地址，OpenAI兼容 /v1/chat/completions"
+  - item: score_api_key
+    type: string
+    default: ""
+    desc: "评分LLM API KEY"
+  - item: score_model_name
+    type: string
+    default: "gpt-4o-mini"
+    desc: "评分LLM模型名"
+  - item: score_timeout
+    type: int
+    default: 20
+    desc: "评分LLM请求超时秒数"
+  - item: visualizer_enabled
+    type: bool
+    default: true
+    desc: "启用情绪可视化前端"
+  - item: visualizer_host
+    type: string
+    default: "127.0.0.1"
+    desc: "前端服务监听地址"
+  - item: visualizer_port
+    type: int
+    default: 5002
+    desc: "前端服务端口"
+  - item: tau_hours
+    type: float
+    default: 4.0
+    desc: "幂律衰减时间尺度"
+  - item: b_base
+    type: float
+    default: 0.7
+    desc: "基础衰减指数"
+  - item: fab_positive_factor
+    type: float
+    default: 0.85
+    desc: "正向情绪衰减减速因子"
+  - item: esm_k
+    type: float
+    default: 0.3
+    desc: "PA/NA软互抑强度"
